@@ -1,6 +1,8 @@
 const express = require('express');
 const morgan = require('morgan');
 
+const blogRoutes = require('./routes/blog.routes');
+
 require('dotenv').config();
 
 const Blog = require('./models/blog');
@@ -8,6 +10,8 @@ const Blog = require('./models/blog');
 const mongoose = require('mongoose');
 
 const app = express();
+
+app.use(express.urlencoded({ extended: true }));
 
 //register view engine
 
@@ -34,45 +38,6 @@ app.use(morgan('dev'));
 app.use(express.static('public'));
 
 
-app.get('/add-blog', (req, res) => {
-    const blog = new Blog({
-        title: "New Blog",
-        snippet: "About my new blog",
-        body: "About my new blog more"
-    });
-
-    blog.save().then((result) => {
-        res.send(result);
-    })
-        .catch((err) => {
-            console.log(err);
-        });
-
-
-});
-
-
-app.get('/get-blogs', (req, res) => {
-    Blog.find()
-        .then((result) => {
-            res.send(result);
-
-        })
-        .catch((err) => {
-            console.log(err);
-        })
-});
-
-app.get('/single-blog', (req, res) => {
-    Blog.findById("6ac643fa144c57478474dce7")
-        .then((result) => {
-            res.send(result);
-        })
-        .catch((err) => {
-            console.log(err);
-        })
-})
-
 
 app.use((req, res, next) => {
     console.log('new request made:');
@@ -82,6 +47,17 @@ app.use((req, res, next) => {
 
     next();
 
+});
+
+
+
+
+// blog routes
+
+app.use(blogRoutes);
+
+app.get('/blogs/create', (req, res) => {
+    res.render('create', { title: 'Create a new blog' });
 });
 
 app.use((req, res, next) => {
