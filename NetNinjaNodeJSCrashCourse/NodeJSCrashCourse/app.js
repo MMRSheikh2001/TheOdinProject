@@ -1,18 +1,78 @@
 const express = require('express');
 const morgan = require('morgan');
 
+require('dotenv').config();
+
+const Blog = require('./models/blog');
+
+const mongoose = require('mongoose');
+
 const app = express();
 
 //register view engine
 
+//db connection
+
+mongoose.connect(process.env.URL)
+    .then((result) => {
+        app.listen(3000);
+        console.log("Connected to DB");
+    }).catch(
+        (err) => {
+            console.log(err);
+        }
+    );
+
+
 app.set('view engine', 'ejs');
 
 
-app.listen(3000);
+
 
 app.use(morgan('dev'));
 
 app.use(express.static('public'));
+
+
+app.get('/add-blog', (req, res) => {
+    const blog = new Blog({
+        title: "New Blog",
+        snippet: "About my new blog",
+        body: "About my new blog more"
+    });
+
+    blog.save().then((result) => {
+        res.send(result);
+    })
+        .catch((err) => {
+            console.log(err);
+        });
+
+
+});
+
+
+app.get('/get-blogs', (req, res) => {
+    Blog.find()
+        .then((result) => {
+            res.send(result);
+
+        })
+        .catch((err) => {
+            console.log(err);
+        })
+});
+
+app.get('/single-blog', (req, res) => {
+    Blog.findById("6ac643fa144c57478474dce7")
+        .then((result) => {
+            res.send(result);
+        })
+        .catch((err) => {
+            console.log(err);
+        })
+})
+
 
 app.use((req, res, next) => {
     console.log('new request made:');
